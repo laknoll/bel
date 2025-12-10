@@ -29,7 +29,7 @@ const interfaceTemplate = `
 {{ end -}}
 {{- define "args" }}{{ range $idx, $val := .Args }}{{ if eq $idx 0 }}{{ else }}, {{ end }}{{ .Name }}: {{ subt .Type }}{{ end }}{{ end -}}
 {{- define "simple" }}{{ .Name }}{{ end -}}
-{{- define "map" }}{ [key: {{ subt (mapKeyType .) }}]: {{ subt (mapValType .) }} }{{ end -}}
+{{- define "map" }}{ [{{ if ( isEnumKey . ) }}key in{{ else }}key:{{ end }} {{ subt (mapKeyType .) }}]: {{ subt (mapValType .) }} }{{ end -}}
 {{- define "array" }}{{ subt (arrType .) }}[]{{ end -}}
 {{- define "root-enum" }}{{- template "comment" . -}}export enum {{ .Name }} {
     {{ range .EnumMembers }}{{ .Name }} = {{ .Value }},
@@ -132,7 +132,17 @@ func Render(types []TypescriptType, cfg ...GenerateOption) error {
 		}
 	}
 
+	isEnumKey := func(t TypescriptType) bool {
+		if len(t.Params) < 2 {
+			return false
+		}
+		keyType := t.Params[0]
+		fmt.Printf("IsEnumKey: %t %v\n", keyType.Kind == TypescriptEnumKind, keyType)
+		return keyType.IsEnum
+	}
+
 	funcs := template.FuncMap{
+		"isEnumKey":  isEnumKey,
 		"mapKeyType": getParam("map", 0, 2),
 		"mapValType": getParam("map", 1, 2),
 		"arrType":    getParam("array", 0, 1),

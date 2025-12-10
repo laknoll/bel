@@ -364,7 +364,7 @@ func (e *extractor) getType(ttype reflect.Type, t *reflect.StructField) (*Typesc
 			EnumMembers: em,
 		}
 		e.addResult(enum)
-		tstype = &TypescriptType{Name: e.typeNamer(ttype), Kind: TypescriptSimpleKind}
+		tstype = &TypescriptType{Name: e.typeNamer(ttype), Kind: TypescriptSimpleKind, IsEnum: true}
 	} else {
 		res, err := e.getPrimitiveType(ttype)
 		if err != nil {

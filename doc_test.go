@@ -1,6 +1,7 @@
 package bel
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/go-test/deep"
@@ -30,6 +31,7 @@ func TestParsedSourceDocHandler(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	sort.Slice(extract, func(ia, ib int) bool { return extract[ia].Name < extract[ib].Name })
 
 	expectation := []TypescriptType{
 		{
