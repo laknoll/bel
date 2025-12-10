@@ -137,7 +137,6 @@ func Render(types []TypescriptType, cfg ...GenerateOption) error {
 			return false
 		}
 		keyType := t.Params[0]
-		fmt.Printf("IsEnumKey: %t %v\n", keyType.Kind == TypescriptEnumKind, keyType)
 		return keyType.IsEnum
 	}
 
