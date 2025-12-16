@@ -23,7 +23,7 @@ const interfaceTemplate = `
 {
     {{ range .Members -}}
     {{- template "comment" . -}}
-    {{ .Name }}{{ if .IsOptional }}?{{ end }}{{ if .IsFunction }}({{ template "args" . }}){{ end }}: {{ subt .Type | default "void" }}
+    {{ validTypeScriptName .Name }}{{ if .IsOptional }}?{{ end }}{{ if .IsFunction }}({{ template "args" . }}){{ end }}: {{ subt .Type | default "void" }}
     {{ end }}
 }
 {{ end -}}
@@ -153,6 +153,12 @@ func Render(types []TypescriptType, cfg ...GenerateOption) error {
 
 			return "root-" + string(t.Kind)
 		}),
+		"validTypeScriptName": func(name string) string {
+			if strings.Contains(name, "-") {
+				name = "\"" + name + "\""
+			}
+			return name
+		},
 		"default": func(def, val string) string {
 			if val == "" {
 				return def
