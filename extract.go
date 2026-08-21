@@ -296,7 +296,9 @@ func (e *extractor) extractStructField(t reflect.StructField) (*TypescriptMember
 			segments = segments[1:]
 		}
 		for _, seg := range segments {
-			if seg == "omitempty" {
+			// omitzero is the Go 1.24+/encoding/json/v2 equivalent of omitempty:
+			// both make the field absent from the JSON output.
+			if seg == "omitempty" || seg == "omitzero" {
 				optional = true
 			}
 		}

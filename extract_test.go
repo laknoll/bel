@@ -51,6 +51,13 @@ type NestedStruct struct {
 	}
 }
 
+type OmitZeroStruct struct {
+	StringField        string
+	OptionalField      string `json:",omitzero"`
+	NamedOptionalField int32  `json:"thisIsOptional,omitzero"`
+	BothField          string `json:"both,omitempty,omitzero"`
+}
+
 // AnotherTestStruct is just yet another struct
 type AnotherTestStruct struct {
 	// Foo has some documentation
@@ -129,6 +136,66 @@ func TestExtractStruct(t *testing.T) {
 							Kind: TypescriptKind("simple"),
 						},
 					},
+				},
+			},
+		},
+	}
+	diff := deep.Equal(expectation, extract)
+	for _, d := range diff {
+		t.Error(d)
+	}
+}
+
+func TestExtractOmitZero(t *testing.T) {
+	extract, err := Extract(OmitZeroStruct{})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expectation := []TypescriptType{
+		{
+			Name: "OmitZeroStruct",
+			Kind: TypescriptKind("iface"),
+			Members: []TypescriptMember{
+				{
+					TypedElement: TypedElement{
+						Name: "StringField",
+						Type: TypescriptType{
+							Name: "string",
+							Kind: TypescriptKind("simple"),
+						},
+					},
+				},
+				{
+					TypedElement: TypedElement{
+						Name: "OptionalField",
+						Type: TypescriptType{
+							Name: "string",
+							Kind: TypescriptKind("simple"),
+						},
+					},
+					IsOptional: true,
+				},
+				{
+					TypedElement: TypedElement{
+						Name: "thisIsOptional",
+						Type: TypescriptType{
+							Name: "number",
+							Kind: TypescriptKind("simple"),
+						},
+					},
+					IsOptional: true,
+				},
+				{
+					TypedElement: TypedElement{
+						Name: "both",
+						Type: TypescriptType{
+							Name: "string",
+							Kind: TypescriptKind("simple"),
+						},
+					},
+					IsOptional: true,
 				},
 			},
 		},
