@@ -146,6 +146,29 @@ func TestExtractStruct(t *testing.T) {
 	}
 }
 
+func TestUpperFirst(t *testing.T) {
+	tests := []struct {
+		Input       string
+		Expectation string
+	}{
+		{"", ""},
+		{"MyTestStruct", "MyTestStruct"},
+		{"fooBar", "FooBar"},
+		{"t", "T"},
+		// acronyms must stay intact
+		{"ID", "ID"},
+		{"HTTPServer", "HTTPServer"},
+		{"ATypeStartingWithA", "ATypeStartingWithA"},
+		// non-ASCII
+		{"ünicode", "Ünicode"},
+	}
+	for _, test := range tests {
+		if act := upperFirst(test.Input); act != test.Expectation {
+			t.Errorf("upperFirst(%q) == %q, expected %q", test.Input, act, test.Expectation)
+		}
+	}
+}
+
 func TestExtractOmitZero(t *testing.T) {
 	extract, err := Extract(OmitZeroStruct{})
 	if err != nil {

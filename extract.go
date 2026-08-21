@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/iancoleman/strcase"
+	"unicode"
+	"unicode/utf8"
 )
 
 // ExtractOption is an option used with the Extract function
@@ -124,13 +124,24 @@ func (e *extractor) addResult(t *TypescriptType) {
 	e.result[t.Name] = *t
 }
 
+// upperFirst upper-cases the first rune of s, leaving the rest untouched. Unlike a
+// general camel-casing, this keeps acronyms in Go type names intact, e.g. HTTPServer
+// stays HTTPServer rather than becoming Httpserver.
+func upperFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
+}
+
 // Extract uses reflection to extract the information required to generate Typescript code
 func Extract(s interface{}, opts ...ExtractOption) ([]TypescriptType, error) {
 	e := &extractor{
 		embedStructs:  false,
 		followStructs: false,
 		typeNamer: func(t reflect.Type) string {
-			return strcase.ToCamel(t.Name())
+			return upperFirst(t.Name())
 		},
 		docHandler: (*nullDocHandler)(nil),
 	}
