@@ -124,15 +124,27 @@ func (e *extractor) addResult(t *TypescriptType) {
 	e.result[t.Name] = *t
 }
 
-// upperFirst upper-cases the first rune of s, leaving the rest untouched. Unlike a
-// general camel-casing, this keeps acronyms in Go type names intact, e.g. HTTPServer
-// stays HTTPServer rather than becoming Httpserver.
-func upperFirst(s string) string {
-	if s == "" {
-		return s
+// typeScriptTypeName turns a Go type name into a valid TypeScript identifier: it
+// drops runes TypeScript does not allow in an identifier and upper-cases the first
+// one. Dropping matters for instantiated generics, whose reflect name carries the
+// type arguments, e.g. Pair[string,int] becomes Pairstringint.
+//
+// Unlike a general camel-casing this leaves the rest of the name alone, so acronyms
+// survive: HTTPServer stays HTTPServer rather than becoming Httpserver.
+func typeScriptTypeName(s string) string {
+	var name strings.Builder
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' || r == '$' {
+			name.WriteRune(r)
+		}
 	}
-	r, size := utf8.DecodeRuneInString(s)
-	return string(unicode.ToUpper(r)) + s[size:]
+
+	res := name.String()
+	if res == "" {
+		return res
+	}
+	r, size := utf8.DecodeRuneInString(res)
+	return string(unicode.ToUpper(r)) + res[size:]
 }
 
 // Extract uses reflection to extract the information required to generate Typescript code
@@ -141,7 +153,7 @@ func Extract(s interface{}, opts ...ExtractOption) ([]TypescriptType, error) {
 		embedStructs:  false,
 		followStructs: false,
 		typeNamer: func(t reflect.Type) string {
-			return upperFirst(t.Name())
+			return typeScriptTypeName(t.Name())
 		},
 		docHandler: (*nullDocHandler)(nil),
 	}

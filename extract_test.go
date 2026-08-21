@@ -146,7 +146,7 @@ func TestExtractStruct(t *testing.T) {
 	}
 }
 
-func TestUpperFirst(t *testing.T) {
+func TestTypeScriptTypeName(t *testing.T) {
 	tests := []struct {
 		Input       string
 		Expectation string
@@ -159,12 +159,16 @@ func TestUpperFirst(t *testing.T) {
 		{"ID", "ID"},
 		{"HTTPServer", "HTTPServer"},
 		{"ATypeStartingWithA", "ATypeStartingWithA"},
-		// non-ASCII
+		// instantiated generics carry their type arguments in the reflect name
+		{"Pair[string,int]", "Pairstringint"},
+		{"Pair[main.Inner,[]uint8]", "PairmainInneruint8"},
+		// legal in a TypeScript identifier, hence kept
+		{"Under_Score", "Under_Score"},
 		{"ünicode", "Ünicode"},
 	}
 	for _, test := range tests {
-		if act := upperFirst(test.Input); act != test.Expectation {
-			t.Errorf("upperFirst(%q) == %q, expected %q", test.Input, act, test.Expectation)
+		if act := typeScriptTypeName(test.Input); act != test.Expectation {
+			t.Errorf("typeScriptTypeName(%q) == %q, expected %q", test.Input, act, test.Expectation)
 		}
 	}
 }
